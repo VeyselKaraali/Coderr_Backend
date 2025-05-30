@@ -1,6 +1,5 @@
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 
 
@@ -26,20 +25,21 @@ class ProfileType(models.TextChoices):
 
 
 class Profile(AbstractBaseUser, PermissionsMixin):
-    username = models.CharField (max_length=32, unique=True)
-    first_name = models.CharField(max_length=32, blank=True)
-    last_name = models.CharField(max_length=32, blank=True)
+    username = models.CharField (max_length=32, unique=True, null=False, blank=False)
+    first_name = models.CharField(max_length=32, blank=True, default='')
+    last_name = models.CharField(max_length=32, blank=True, default='')
     file = models.FileField(null=True, blank=True)
-    location = models.CharField(max_length=64, blank=True)
-    tel = models.CharField(max_length=32, blank=True)
-    description = models.TextField(blank=True)
-    working_hours = models.CharField(max_length=32, blank=True)
+    location = models.CharField(max_length=64, blank=True, default='')
+    tel = models.CharField(max_length=32, blank=True, default='')
+    description = models.TextField(blank=True, default='')
+    working_hours = models.CharField(max_length=64, blank=True, default='')
     type = models.CharField(max_length=16, choices=ProfileType.choices)
     email = models.EmailField(unique=True, null=True, blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_guest = models.BooleanField(default=False)
-    created_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     objects = ProfileManager()
 
     USERNAME_FIELD = 'username'
