@@ -21,11 +21,12 @@ class ProfileManager(BaseUserManager):
 
 class ProfileType(models.TextChoices):
     CUSTOMER = 'CUSTOMER', 'Customer'
-    FREELANCER = 'FREELANCER', 'Freelancer'
+    BUSINESS = 'BUSINESS', 'BUSINESS'
 
 
 class Profile(AbstractBaseUser, PermissionsMixin):
     username = models.CharField (max_length=32, unique=True, null=False, blank=False)
+    email = models.EmailField(unique=True, null=True, blank=True)
     first_name = models.CharField(max_length=32, blank=True, default='')
     last_name = models.CharField(max_length=32, blank=True, default='')
     file = models.FileField(null=True, blank=True)
@@ -34,7 +35,6 @@ class Profile(AbstractBaseUser, PermissionsMixin):
     description = models.TextField(blank=True, default='')
     working_hours = models.CharField(max_length=64, blank=True, default='')
     type = models.CharField(max_length=16, choices=ProfileType.choices)
-    email = models.EmailField(unique=True, null=True, blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_guest = models.BooleanField(default=False)
