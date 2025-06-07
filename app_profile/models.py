@@ -1,13 +1,13 @@
 from django.db import models
-from app_authentication.models import Account, AccountType
-from core.models import TimeStamped
+from app_authentication.models import User, UserType
 from django.db.models import Q
 
-class Profile(TimeStamped):
-    account = models.OneToOneField(
-        Account,
+
+class Profile(models.Model):
+    user = models.OneToOneField(
+        User,
         on_delete=models.CASCADE,
-        limit_choices_to=~Q(type=AccountType.SUPERUSER),
+        limit_choices_to=~Q(type=UserType.SUPERUSER),
         related_name='profile'
     )
     first_name = models.CharField(max_length=32, blank=True, default='')
@@ -17,7 +17,9 @@ class Profile(TimeStamped):
     tel = models.CharField(max_length=32, blank=True, default='')
     description = models.TextField(blank=True, default='')
     working_hours = models.CharField(max_length=64, blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.account.username}"
+        return f"{self.user.username}"
 

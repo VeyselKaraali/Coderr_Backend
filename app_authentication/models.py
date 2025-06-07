@@ -1,19 +1,20 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-from app_user.models import User
-from core.models import TimeStamped
+from app_user.models import AbstractUser
 
 
-class AccountType(models.TextChoices):
+class UserType(models.TextChoices):
     CUSTOMER = 'CUSTOMER', 'Customer'
     BUSINESS = 'BUSINESS', 'Business'
     SUPERUSER = 'SUPERUSER', 'Superuser'
 
 
-class Account(User, TimeStamped):
+class User(AbstractUser):
     email = models.EmailField(unique=True, null=True, blank=True)
-    type = models.CharField(choices=AccountType.choices, max_length=16)
+    type = models.CharField(choices=UserType.choices, max_length=16)
     is_guest = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     REQUIRED_FIELDS = ['type']
 
@@ -23,11 +24,11 @@ class Account(User, TimeStamped):
         if self.is_guest and self.email:
             raise ValidationError('Guest users must not have an email address.')
 
-        if self.is_guest and (self.is_superuser or self.is_staff or self.type == AccountType.SUPERUSER):
-            raise ValidationError("A guest account cannot be a superuser, staff member, or have the type 'SUPERUSER'.")
+        if self.is_guest and (self.is_superuser or self.is_staff or self.type == UserType.SUPERUSER):
+            raise ValidationError("A guest user cannot be a superuser, staff member, or have the type 'SUPERUSER'.")
 
-        if self.is_superuser and self.type != AccountType.SUPERUSER:
-            raise ValidationError('Superusers must have the account type SUPERUSER.')
+        if self.is_superuser and self.type != UserType.SUPERUSER:
+            raise ValidationError('Superusers must have the user type SUPERUSER.')
 
         if self.is_superuser:
             return
