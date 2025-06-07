@@ -1,12 +1,12 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from app_authentication.models import Account
+from app_authentication.models import User
 
 
-@admin.register(Account)
-class AccountAdmin(UserAdmin):
+@admin.register(User)
+class UserAdmin(UserAdmin):
     readonly_fields = ['created_at', 'updated_at', 'last_login']
-    list_display = ['username', 'email', 'type', 'is_active', 'is_staff', 'is_guest']
+    list_display = ['id', 'username', 'email', 'type', 'is_active', 'is_staff', 'is_guest']
     list_filter = ['type', 'is_active', 'is_staff', 'is_guest']
     search_fields = ['username', 'email']
     ordering = ['username', 'created_at']
