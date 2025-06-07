@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-from app_user.models import AbstractUser
+from app_abstract_user.models import AbstractUser
 
 
 class UserType(models.TextChoices):
