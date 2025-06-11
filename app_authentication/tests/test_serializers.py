@@ -34,3 +34,31 @@ class RegistrationSerializerTests(APITestCase):
         user = serializer.save()
         self.assertIsInstance(user, User)
         self.assertTrue(user.check_password(self.get_valid_data()['password']))
+
+
+class LoginSerializerTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='tester',
+            password='pass123',
+            email='test@test.com',
+            type='CUSTOMER'
+        )
+
+    def get_login_data(self, **kwargs):
+        data = {
+            'username': self.user.username,
+            'password': 'pass123',
+        }
+        data.update(kwargs)
+        return data
+
+    def test_valid_login(self):
+        serializer = LoginSerializer(data=self.get_login_data())
+        serializer.is_valid(raise_exception=True)
+        self.assertEqual(serializer.validated_data['user'], self.user)
+
+    def test_invalid_login(self):
+        serializer = LoginSerializer(data=self.get_login_data(password='wrongpass'))
+        with self.assertRaises(serializers.ValidationError):
+            serializer.is_valid(raise_exception=True)
