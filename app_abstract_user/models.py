@@ -1,13 +1,29 @@
 from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
+from django.core.exceptions import ValidationError
 from django.db import models
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, username, password=None, **extra_fields):
+    MIN_PASSWORD_LENGTH = 6
+
+    def validate_password_length(self, password):
+        if len(password) < self.MIN_PASSWORD_LENGTH:
+            raise ValidationError(
+                f'Password must be at least {self.MIN_PASSWORD_LENGTH} characters long.'
+            )
+
+    def create_user(self, username, email=None, password=None, **extra_fields):
         if not username:
             raise ValueError('The Username field must be set.')
-        user = self.model(username=username, **extra_fields)
+
+        if email:
+            email = self.normalize_email(email)
+
+        if password:
+            self.validate_password_length(password)
+
+        user = self.model(username=username, email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
