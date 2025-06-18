@@ -1,5 +1,7 @@
 from django.contrib.auth import authenticate
+
 from rest_framework import serializers
+
 from app_authentication.models import User
 
 
