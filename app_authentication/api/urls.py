@@ -1,6 +1,9 @@
 from django.urls import path
+
 from rest_framework_simplejwt.views import TokenRefreshView
+
 from app_authentication.api import views
+
 
 urlpatterns = [
     path('api/registration/', views.RegistrationView.as_view(), name='registration'),
