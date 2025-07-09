@@ -38,3 +38,34 @@ class UserModelTests(APITestCase):
         }
         defaults.update(kwargs)
         return User(**defaults)
+
+    def assert_raises_validation_error(self, user):
+        with self.assertRaises(ValidationError):
+            user.clean()
+
+    def test_guest_with_email_error(self):
+        user = self.create_user(is_guest=True)
+        self.assert_raises_validation_error(user)
+
+    def test_multiple_guest_with_empty_email_success(self):
+        valid_test_cases = [
+            {'username': 'guest1', 'email': None},
+            {'username': 'guest2', 'email': None},
+            {'username': 'guest3'},
+            {'username': 'guest4'},
+        ]
+
+        for case in valid_test_cases:
+            with self.subTest(case=case):
+                user = User.objects.create_user(
+                    username=case['username'],
+                    email=case.get('email'),
+                    password='pass123',
+                    is_guest=True,
+                    type='CUSTOMER'
+                )
+                self.assertIsNone(user.email)
+                self.assertTrue(user.is_guest)
+
+        self.assertEqual(User.objects.filter(is_guest=True).count(), len(valid_test_cases))
+
