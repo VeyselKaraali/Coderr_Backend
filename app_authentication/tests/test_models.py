@@ -69,3 +69,11 @@ class UserModelTests(APITestCase):
 
         self.assertEqual(User.objects.filter(is_guest=True).count(), len(valid_test_cases))
 
+    def test_guest_with_superuser_error(self):
+        user = self.create_user(email='', is_guest=True, is_superuser=True, type='SUPERUSER')
+        self.assert_raises_validation_error(user)
+
+    def test_superuser_wrong_type_error(self):
+        user = self.create_user(is_superuser=True, type='CUSTOMER')
+        self.assert_raises_validation_error(user)
+
