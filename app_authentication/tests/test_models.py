@@ -77,3 +77,11 @@ class UserModelTests(APITestCase):
         user = self.create_user(is_superuser=True, type='CUSTOMER')
         self.assert_raises_validation_error(user)
 
+    def test_superuser_correct_type_success(self):
+        user = self.create_user(is_superuser=True, type='SUPERUSER')
+        user.clean()
+
+    def test_new_user_without_email_raises_error(self):
+        user = self.create_user(email='', type='CUSTOMER')
+        self.assert_raises_validation_error(user)
+
