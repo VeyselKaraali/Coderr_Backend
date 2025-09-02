@@ -36,3 +36,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f"{self.username}"
+
+    class Meta:
+        verbose_name = "account"

@@ -1,15 +1,15 @@
 from django.contrib import admin
 from django.test import TestCase
 
-from app_authentication.models import User
+from app_authentication.models import CustomUser
 
 
 class UserAdminTests(TestCase):
     def test_user_model_registered_in_admin(self):
-        self.assertIn(User, admin.site._registry)
+        self.assertIn(CustomUser, admin.site._registry)
 
     def test_user_admin_configurations(self):
-        user_admin = admin.site._registry[User]
+        user_admin = admin.site._registry[CustomUser]
 
         self.assertEqual(
             set(user_admin.readonly_fields),

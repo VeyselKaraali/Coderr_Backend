@@ -1,30 +1,43 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
-from app_authentication.models import User
+from django.contrib.auth.models import Group
+from rest_framework.authtoken.models import TokenProxy
+
+from app_authentication.models import CustomUser
+
+admin.site.unregister(TokenProxy)
+admin.site.unregister(Group)
+
+class CustomUserCreationForm(UserCreationForm):
+    class Meta:
+        model = CustomUser
+        fields = ('username',)
+
+class CustomUserChangeForm(UserChangeForm):
+    class Meta:
+        model = CustomUser
+        fields = ('username', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')
 
 
-@admin.register(User)
-class UserAdmin(UserAdmin):
-    readonly_fields = ['created_at', 'updated_at', 'last_login']
-    list_display = ['id', 'username', 'email', 'type', 'is_active', 'is_staff', 'is_guest']
-    list_filter = ['type', 'is_active', 'is_staff', 'is_guest']
-    search_fields = ['username', 'email']
-    ordering = ['username', 'created_at']
+@admin.register(CustomUser)
+class UserAdmin(BaseUserAdmin):
+    form = CustomUserChangeForm
+    add_form = CustomUserCreationForm
 
-    personal_info_fields = ('email', 'type', 'is_guest')
-    permissions_fields = ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')
-    important_dates_fields = ('created_at', 'updated_at', 'last_login')
-
-    add_fieldsets = (
-        (None, {'classes': ('wide',), 'fields': ('username', 'password1', 'password2')}),
-        ('Personal info', {'classes': ('wide',), 'fields': personal_info_fields}),
-        ('Permissions', {'classes': ('wide',), 'fields': permissions_fields}),
-    )
+    readonly_fields = ['is_staff', 'is_superuser', 'last_login']
+    list_display = ['id', 'username', 'is_active', 'is_staff', 'is_superuser']
+    list_filter = ['is_active', 'is_staff', 'is_superuser']
+    search_fields = ['username']
+    ordering = ['username']
 
     fieldsets = (
-        (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': personal_info_fields}),
-        ('Permissions', {'fields': permissions_fields}),
-        ('Important dates', {'fields': important_dates_fields}),
+        ('Login Information', {'fields': ('username', 'password')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Activity', {'fields': ('last_login',)}),
+    )
+
+    add_fieldsets = (
+        ('Create New User', {'classes': ('wide',),'fields': ('username', 'password1', 'password2')}),
     )

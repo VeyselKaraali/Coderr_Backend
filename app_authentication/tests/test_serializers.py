@@ -14,7 +14,7 @@ class RegistrationSerializerTests(APITestCase):
             'username': 'testuser',
             'email': 'test@test.com',
             'password': 'pass123',
-            'password_repeat': 'pass123',
+            'repeated_password': 'pass123',
             'type': 'CUSTOMER',
         }
         data.update(kwargs)
@@ -23,13 +23,13 @@ class RegistrationSerializerTests(APITestCase):
     def test_passwords_match(self):
         serializer = RegistrationSerializer(data=self.get_valid_data())
         self.assertTrue(serializer.is_valid())
-        self.assertNotIn('password_repeat', serializer.errors)
+        self.assertNotIn('repeated_password', serializer.errors)
 
     def test_passwords_do_not_match(self):
-        invalid_data = self.get_valid_data(password_repeat='wrongPass')
+        invalid_data = self.get_valid_data(repeated_password='wrongPass')
         serializer = RegistrationSerializer(data=invalid_data)
         self.assertFalse(serializer.is_valid())
-        self.assertIn('password_repeat', serializer.errors)
+        self.assertIn('repeated_password', serializer.errors)
 
     def test_create_user_success(self):
         serializer = RegistrationSerializer(data=self.get_valid_data())
