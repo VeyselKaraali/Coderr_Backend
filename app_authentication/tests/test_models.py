@@ -19,9 +19,8 @@ class UserModelTests(APITestCase):
             'username': 'testuser',
             'email': 'test@example.com',
             'password': 'pass123',
-            'password_repeat': 'pass123',
+            'repeated_password': 'pass123',
             'type': 'CUSTOMER',
-            'is_guest': False,
             'is_superuser': False,
             'is_staff': False,
         }
@@ -32,7 +31,6 @@ class UserModelTests(APITestCase):
             'email': 'test@example.com',
             'password': 'pass123',
             'type': 'CUSTOMER',
-            'is_guest': False,
             'is_superuser': False,
             'is_staff': False,
         }
@@ -101,3 +99,62 @@ class UserModelTests(APITestCase):
                 type='CUSTOMER'
             )
 
+    def test_new_user_email_is_normalized(self):
+        sample_emails = [
+            ['test1@EXAMPLE.com', 'test1@example.com'],
+            ['Test2@Example.com', 'Test2@example.com'],
+            ['TEST3@EXAMPLE.com', 'TEST3@example.com'],
+            ['test4@example.COM', 'test4@example.com'],
+        ]
+        for i, (email, expected) in enumerate(sample_emails) :
+            user = get_user_model().objects.create_user(
+                username=f'testuser{i}',
+                email=email,
+                password='pass123',
+                type='CUSTOMER'
+            )
+            self.assertEqual(user.email, expected)
+
+    def test_user_with_email_exists_error(self):
+        User.objects.create_user(
+            username='user1',
+            email='test@example.com',
+            password='pass123',
+            type='CUSTOMER'
+        )
+
+        with self.assertRaises(ValidationError):
+            User.objects.create_user(
+                username='user2',
+                email='test@example.com',
+                password='pass123',
+                type='CUSTOMER'
+            )
+
+    def test_password_too_short_error(self):
+        with self.assertRaises(ValidationError):
+            User.objects.create_user(
+                username='shortpwuser',
+                email='shortpw@example.com',
+                password='123',  # Zu kurzes Passwort
+                type='CUSTOMER'
+            )
+
+    def test_password_length_success(self):
+        user = User.objects.create_user(
+            username='validpwuser',
+            email='validpw@example.com',
+            password='longenoughpassword123',  # Ausreichend langes Passwort
+            type='CUSTOMER'
+        )
+        self.assertIsNotNone(user)
+
+    def test_non_superuser_missing_type_error(self):
+        user = self.create_user(email='user@test.com', type=None)
+        self.assert_raises_validation_error(user)
+
+    def test_save_calls_clean(self):
+        user = self.create_user()
+        with patch.object(User, 'clean') as mock_clean:
+            user.save()
+            mock_clean.assert_called_once()
