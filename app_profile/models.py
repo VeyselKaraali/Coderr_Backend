@@ -1,18 +1,13 @@
 from django.db import models
-from app_authentication.models import User, UserType
-from django.db.models import Q
+
+from app_authentication.models import CustomUser
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-        limit_choices_to=~Q(type=UserType.SUPERUSER),
-        related_name='profile'
-    )
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='profile')
     first_name = models.CharField(max_length=32, blank=True, default='')
     last_name = models.CharField(max_length=32, blank=True, default='')
-    file = models.FileField(null=True, blank=True)
+    file = models.FileField(blank=True)
     location = models.CharField(max_length=64, blank=True, default='')
     tel = models.CharField(max_length=32, blank=True, default='')
     description = models.TextField(blank=True, default='')
