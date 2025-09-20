@@ -24,3 +24,22 @@ class Offer(models.Model):
         return self.title
 
 
+class OfferDetail(models.Model):
+    offer = models.ForeignKey(Offer, on_delete=models.CASCADE, related_name="details")
+    title = models.CharField(max_length=255)
+    revisions = models.PositiveIntegerField()
+    delivery_time_in_days = models.PositiveIntegerField()
+    price = models.DecimalField(max_digits=16, decimal_places=2)
+    OFFER_TYPES = [
+        ('basic', 'Basic'),
+        ('standard', 'Standard'),
+        ('premium', 'Premium'),
+    ]
+    offer_type = models.CharField(max_length=32, choices=OFFER_TYPES)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.offer.title} – {self.title} ({self.offer_type})"
+
+
+
