@@ -42,4 +42,6 @@ class OfferDetail(models.Model):
         return f"{self.offer.title} – {self.title} ({self.offer_type})"
 
 
-
+class Feature(models.Model):
+    offer_detail = models.ForeignKey(OfferDetail, on_delete=models.CASCADE, related_name="features")
+    name = models.CharField(max_length=255)
