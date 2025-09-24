@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import APIView
 
+from app_profile.models import Profile
 from .serializers import LoginSerializer, RegistrationSerializer, RegistrationGuestSerializer
 
 
@@ -19,6 +20,8 @@ class RegistrationView(APIView):
 
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
+
+        Profile.objects.get_or_create(user=user)
 
         token, created = Token.objects.get_or_create(user=user)
         data = {
