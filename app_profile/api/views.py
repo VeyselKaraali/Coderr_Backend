@@ -6,12 +6,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from app_authentication.models import CustomUser
+from app_authentication.permissions import IsProfileOwnerOrReadOnly
 from app_profile.api.serializers import BusinessProfileSerializer, CustomerProfileSerializer, ProfileDetailSerializer
 from app_profile.models import Profile
 
 
 class ProfileDetailView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsProfileOwnerOrReadOnly]
 
     def get(self, request, id):
         profile = get_object_or_404(Profile, pk=id)
@@ -20,9 +21,6 @@ class ProfileDetailView(APIView):
 
     def patch(self, request, id):
         profile = get_object_or_404(Profile, pk=id)
-
-        if profile.user != request.user:
-            raise PermissionDenied("You are not allowed to edit this profile.")
 
         data = request.data.copy()
 
