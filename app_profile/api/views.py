@@ -21,6 +21,7 @@ class ProfileDetailView(APIView):
 
     def patch(self, request, id):
         profile = get_object_or_404(Profile, pk=id)
+        self.check_object_permissions(request, profile)
 
         data = request.data.copy()
 
