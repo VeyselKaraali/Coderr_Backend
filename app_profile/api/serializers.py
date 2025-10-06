@@ -6,7 +6,7 @@ from app_profile.models import Profile
 class ProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     type = serializers.CharField(source='user.type', read_only=True)
-    is_guest = serializers.CharField(source='user.is_guest', read_only=True)
+    is_guest = serializers.BooleanField(source='user.is_guest', read_only=True)
 
     class Meta:
         model = Profile
