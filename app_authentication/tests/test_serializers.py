@@ -1,67 +1,54 @@
-from django.contrib.auth import get_user_model
+import pytest
+from rest_framework.exceptions import ValidationError
+from app_authentication.api.serializers import RegistrationSerializer, RegistrationGuestSerializer, LoginSerializer
+from app_authentication.models import CustomUser
 
-from rest_framework import serializers
-from rest_framework.test import APITestCase
+@pytest.mark.django_db
+class TestAuthSerializers:
 
-from app_authentication.api.serializers import LoginSerializer, RegistrationSerializer
-
-
-User = get_user_model()
-
-class RegistrationSerializerTests(APITestCase):
-    def get_valid_data(self, **kwargs):
-        data = {
-            'username': 'testuser',
-            'email': 'test@test.com',
-            'password': 'pass123',
-            'repeated_password': 'pass123',
-            'type': 'CUSTOMER',
+    @pytest.fixture
+    def user_data(self):
+        return {
+            "username": "user",
+            "email": "user@test.com",
+            "password": "Password123!",
+            "repeated_password": "Password123!",
+            "type": "customer",
+            "is_guest": False
         }
-        data.update(kwargs)
-        return data
 
-    def test_passwords_match(self):
-        serializer = RegistrationSerializer(data=self.get_valid_data())
-        self.assertTrue(serializer.is_valid())
-        self.assertNotIn('repeated_password', serializer.errors)
-
-    def test_passwords_do_not_match(self):
-        invalid_data = self.get_valid_data(repeated_password='wrongPass')
-        serializer = RegistrationSerializer(data=invalid_data)
-        self.assertFalse(serializer.is_valid())
-        self.assertIn('repeated_password', serializer.errors)
-
-    def test_create_user_success(self):
-        serializer = RegistrationSerializer(data=self.get_valid_data())
-        serializer.is_valid(raise_exception=True)
+    def test_registration_serializer_valid(self, user_data):
+        serializer = RegistrationSerializer(data=user_data)
+        assert serializer.is_valid()
         user = serializer.save()
-        self.assertIsInstance(user, User)
-        self.assertTrue(user.check_password(self.get_valid_data()['password']))
+        assert user.username == user_data["username"]
+        assert user.email == user_data["email"]
+        assert not user.is_guest
+        assert user.check_password(user_data["password"])
 
+    def test_registration_serializer_password_mismatch(self, user_data):
+        user_data["repeated_password"] = "WrongPassword"
+        serializer = RegistrationSerializer(data=user_data)
+        with pytest.raises(ValidationError):
+            serializer.is_valid(raise_exception=True)
 
-class LoginSerializerTests(APITestCase):
-    def setUp(self):
-        self.user = User.objects.create_user(
-            username='tester',
-            password='pass123',
-            email='test@test.com',
-            type='CUSTOMER'
-        )
+    def test_guest_serializer_creates_guest(self):
+        serializer = RegistrationGuestSerializer(data={"type": "customer", "is_guest": True})
+        assert serializer.is_valid()
+        guest = serializer.save()
+        assert guest.is_guest
+        assert guest.username.startswith("Guest_")
+        assert guest.email.startswith("guest_")
+        assert not guest.has_usable_password()
 
-    def get_login_data(self, **kwargs):
-        data = {
-            'username': self.user.username,
-            'password': 'pass123',
-        }
-        data.update(kwargs)
-        return data
+    def test_login_serializer_valid(self):
+        user = CustomUser.objects.create_user(username="user1", email="user1@test.com", password="Password123!")
+        serializer = LoginSerializer(data={"username": "user1", "password": "Password123!"})
+        assert serializer.is_valid()
+        validated_data = serializer.validated_data
+        assert validated_data["user"] == user
 
-    def test_valid_login(self):
-        serializer = LoginSerializer(data=self.get_login_data())
-        serializer.is_valid(raise_exception=True)
-        self.assertEqual(serializer.validated_data['user'], self.user)
-
-    def test_invalid_login(self):
-        serializer = LoginSerializer(data=self.get_login_data(password='wrongpass'))
-        with self.assertRaises(serializers.ValidationError):
+    def test_login_serializer_invalid(self):
+        serializer = LoginSerializer(data={"username": "wrong", "password": "abc"})
+        with pytest.raises(ValidationError):
             serializer.is_valid(raise_exception=True)

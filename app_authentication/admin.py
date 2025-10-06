@@ -26,11 +26,11 @@ class UserAdmin(BaseUserAdmin):
     form = CustomUserChangeForm
     add_form = CustomUserCreationForm
 
-    readonly_fields = ['is_staff', 'is_superuser', 'last_login']
+    readonly_fields = ['last_login', 'is_staff', 'is_superuser', 'created_at', 'updated_at']
     list_display = ['id', 'username', 'is_active', 'is_staff', 'is_superuser']
     list_filter = ['is_active', 'is_staff', 'is_superuser']
     search_fields = ['username']
-    ordering = ['username']
+    ordering = ['username', 'created_at']
 
     fieldsets = (
         ('Login Information', {'fields': ('username', 'password')}),

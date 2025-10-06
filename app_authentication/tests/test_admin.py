@@ -1,25 +1,63 @@
-from django.contrib import admin
-from django.test import TestCase
-
+import pytest
+from django.contrib.admin.sites import AdminSite
+from app_authentication.admin import UserAdmin
 from app_authentication.models import CustomUser
 
+@pytest.mark.django_db
+class TestUserAdmin:
 
-class UserAdminTests(TestCase):
-    def test_user_model_registered_in_admin(self):
-        self.assertIn(CustomUser, admin.site._registry)
-
-    def test_user_admin_configurations(self):
-        user_admin = admin.site._registry[CustomUser]
-
-        self.assertEqual(
-            set(user_admin.readonly_fields),
-            {'created_at', 'updated_at', 'last_login'}
+    @pytest.fixture
+    def admin_user(self, db):
+        return CustomUser.objects.create_superuser(
+            username="admin",
+            email="admin@test.com",
+            password="AdminPass123!"
         )
 
-        self.assertEqual(
-            user_admin.ordering,
-            ['username', 'created_at']
+    @pytest.fixture
+    def normal_user(self, db):
+        return CustomUser.objects.create_user(
+            username="user",
+            email="user@test.com",
+            password="Password123!",
+            type="customer"
         )
 
-        self.assertIsNotNone(user_admin.add_fieldsets)
-        self.assertIsNotNone(user_admin.fieldsets)
+    @pytest.fixture
+    def admin_site(self):
+        return AdminSite()
+
+    def test_list_display_fields(self, admin_site):
+        model_admin = UserAdmin(CustomUser, admin_site)
+        expected = ['id', 'username', 'is_active', 'is_staff', 'is_superuser']
+        assert model_admin.list_display == expected
+
+    def test_readonly_fields(self, admin_site):
+        model_admin = UserAdmin(CustomUser, admin_site)
+        expected = ['last_login', 'is_staff', 'is_superuser', 'created_at', 'updated_at']
+        assert model_admin.readonly_fields == expected
+
+    def test_get_readonly_fields_on_edit(self, admin_site, normal_user):
+        model_admin = UserAdmin(CustomUser, admin_site)
+        readonly = model_admin.get_readonly_fields(None, normal_user)
+        expected = ['last_login', 'is_staff', 'is_superuser', 'created_at', 'updated_at']
+        assert readonly == expected
+
+    def test_get_readonly_fields_on_add(self, admin_site):
+        model_admin = UserAdmin(CustomUser, admin_site)
+        readonly = model_admin.get_readonly_fields(None, None)
+        expected = ['last_login', 'is_staff', 'is_superuser', 'created_at', 'updated_at']
+        assert readonly == expected
+
+    def test_fieldsets_on_add(self, admin_site):
+        model_admin = UserAdmin(CustomUser, admin_site)
+        fieldsets = model_admin.get_fieldsets(None)
+        assert any('Create New User' in str(fs) for fs in model_admin.add_fieldsets)
+
+    def test_fieldsets_on_edit(self, admin_site, normal_user):
+        model_admin = UserAdmin(CustomUser, admin_site)
+        fieldsets = model_admin.get_fieldsets(None, normal_user)
+        labels = [fs[0] for fs in fieldsets]
+        assert 'Login Information' in labels
+        assert 'Permissions' in labels
+        assert 'Activity' in labels
