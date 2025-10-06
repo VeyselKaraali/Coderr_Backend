@@ -10,6 +10,18 @@ from app_reviews.models import Review
 
 
 class ReviewView(APIView):
+    """
+    API view to manage reviews.
+
+    Methods:
+        - GET: Retrieve reviews, with optional filtering by business_user_id or reviewer_id.
+        - POST: Create a new review.
+        - PATCH: Update an existing review (partial updates allowed).
+        - DELETE: Delete a review.
+    Permissions:
+        - GET/POST: Requires authentication.
+        - PATCH/DELETE: Requires authentication and reviewer ownership.
+    """
     def get_permissions(self):
         if self.request.method in ["GET", "POST"]:
             return [IsAuthenticated()]
@@ -18,6 +30,10 @@ class ReviewView(APIView):
         return [AllowAny()]
 
     def get(self, request):
+        """
+        Retrieve all reviews, optionally filtered by business_user_id or reviewer_id.
+        Allows ordering by 'updated_at' or 'rating'.
+        """
         queryset = Review.objects.all()
 
         business_user_id = request.query_params.get("business_user_id")
@@ -36,6 +52,10 @@ class ReviewView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
+        """
+        Create a new review.
+        Validates that the reviewer is not reviewing themselves and has not already reviewed this business.
+        """
         serializer = ReviewCreateUpdateSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             review = serializer.save()
@@ -44,6 +64,10 @@ class ReviewView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, id):
+        """
+        Partially update an existing review identified by ID.
+        Only the reviewer who created the review can update it.
+        """
         review = get_object_or_404(Review, pk=id)
 
         serializer = ReviewCreateUpdateSerializer(
@@ -61,6 +85,10 @@ class ReviewView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, id):
+        """
+        Delete a review identified by ID.
+        Only the reviewer who created the review can delete it.
+        """
         review = get_object_or_404(Review, pk=id)
         self.check_object_permissions(request, review)
 
