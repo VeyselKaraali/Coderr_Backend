@@ -114,11 +114,11 @@ class OfferSerializer(serializers.ModelSerializer):
 
     def get_user_details(self, obj):
         profile = getattr(obj.user, 'profile', None)
-        if profile:
-            return {
-                'first_name': profile.first_name,
-                'last_name': profile.last_name,
-                'username': obj.user.username
-            }
+
+        return {
+            'first_name': profile.first_name if profile else '',
+            'last_name': profile.last_name if profile else '',
+            'username': obj.user.username
+        }
 
 
