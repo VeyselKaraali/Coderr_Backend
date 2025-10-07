@@ -30,7 +30,7 @@ This is the backend of the Coderr project built with **Django** and **Django RES
 
 ```bash
 git clone https://github.com/VeyselKaraali/Coderr_Backend.git
-cd coderr-backend
+cd Coderr_Backend
 ```
 
 ### 2. Create a virtual environment
