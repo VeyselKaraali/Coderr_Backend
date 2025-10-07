@@ -83,9 +83,15 @@ target/
 *.pyc
 local_settings.py
 
+# Ignore all migrations
+*/migrations/*
+
+# Except the __init__.py file (so empty migration folders exist in git)
+!*/migrations/__init__.py
+
 venv
 db.sqlite3
-migrations
+
 
 ### JetBrains template
 .idea
