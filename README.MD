@@ -1,6 +1,9 @@
 # Coderr Backend
 
-This is the backend of the Coderr project built with **Django** and **Django REST Framework**.
+This is the backend of the Coderr project, built with **Django** and **Django REST Framework**. 
+Coderr is a platform designed for freelancers and clients, enabling developers to 
+create, manage, and sell their services. The backend handles user authentication, user profiles, service offers, orders, and reviews. It provides a robust 
+API with token-based authentication.
 
 ## Table of Contents
 
