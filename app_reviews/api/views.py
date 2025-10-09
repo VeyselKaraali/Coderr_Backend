@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from app_authentication.api.permissions import IsReviewerOrReadOnly
+from app_authentication.api.permissions import IsReviewerOrReadOnly, IsCustomerUser
 from app_reviews.api.serializers import ReviewSerializer, ReviewCreateUpdateSerializer
 from app_reviews.models import Review
 
@@ -23,8 +23,10 @@ class ReviewView(APIView):
         - PATCH/DELETE: Requires authentication and reviewer ownership.
     """
     def get_permissions(self):
-        if self.request.method in ["GET", "POST"]:
+        if self.request.method in ["GET"]:
             return [IsAuthenticated()]
+        if self.request.method in ["POST"]:
+            return [IsAuthenticated(), IsCustomerUser()]
         if self.request.method in ["PATCH", "DELETE"]:
             return [IsAuthenticated(), IsReviewerOrReadOnly()]
         return [AllowAny()]
