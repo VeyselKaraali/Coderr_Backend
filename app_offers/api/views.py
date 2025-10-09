@@ -46,15 +46,15 @@ class OffersView(APIView):
         params = request.query_params
 
         try:
-            if "creator_id" in params:
+            if "creator_id" in params and params["creator_id"]:
                 creator_id = int(params["creator_id"])
                 queryset = queryset.filter(user_id=creator_id)
 
-            if "min_price" in params:
+            if "min_price" in params and params["min_price"]:
                 min_price = float(params["min_price"])
                 queryset = queryset.filter(details__price__gte=min_price)
 
-            if "max_delivery_time" in params:
+            if "max_delivery_time" in params and params["max_delivery_time"]:
                 max_delivery = int(params["max_delivery_time"])
                 queryset = queryset.filter(details__delivery_time_in_days__lte=max_delivery)
 
@@ -64,7 +64,7 @@ class OffersView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        if "search" in params:
+        if "search" in params and params["search"]:
             search = params["search"]
             queryset = queryset.filter(Q(title__icontains=search) | Q(description__icontains=search))
 
