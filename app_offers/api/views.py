@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from app_authentication.permissions import IsBusinessUser, IsProfileOwnerOrReadOnly
+from app_authentication.api.permissions import IsBusinessUser, IsProfileOwnerOrReadOnly
 from app_offers.models import Offer, Detail
 from .pagination import CustomPagination
 from .serializers import OfferSerializer, OfferCreateUpdateSerializer, OfferReadOnlySerializer, DetailSerializer
@@ -44,13 +44,27 @@ class OffersView(APIView):
         )
 
         params = request.query_params
-        if params.get("creator_id"):
-            queryset = queryset.filter(user_id=params["creator_id"])
-        if params.get("min_price"):
-            queryset = queryset.filter(details__price__gte=params["min_price"])
-        if params.get("max_delivery_time"):
-            queryset = queryset.filter(details__delivery_time_in_days__lte=params["max_delivery_time"])
-        if params.get("search"):
+
+        try:
+            if "creator_id" in params:
+                creator_id = int(params["creator_id"])
+                queryset = queryset.filter(user_id=creator_id)
+
+            if "min_price" in params:
+                min_price = float(params["min_price"])
+                queryset = queryset.filter(details__price__gte=min_price)
+
+            if "max_delivery_time" in params:
+                max_delivery = int(params["max_delivery_time"])
+                queryset = queryset.filter(details__delivery_time_in_days__lte=max_delivery)
+
+        except (ValueError, TypeError):
+            return Response(
+                {"detail": "Invalid query parameter type."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if "search" in params:
             search = params["search"]
             queryset = queryset.filter(Q(title__icontains=search) | Q(description__icontains=search))
 
