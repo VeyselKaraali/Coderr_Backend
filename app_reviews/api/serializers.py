@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
+
 from app_reviews.models import Review
 
 
@@ -45,10 +47,10 @@ class ReviewCreateUpdateSerializer(serializers.ModelSerializer):
         business_user = data.get("business_user")
 
         if reviewer == business_user:
-            raise serializers.ValidationError("You cannot review yourself.")
+            raise PermissionDenied("You cannot review yourself.")
 
         if Review.objects.filter(business_user=business_user, reviewer=reviewer).exists():
-            raise serializers.ValidationError("You have already reviewed this provider.")
+            raise PermissionDenied("You have already reviewed this provider.")
 
         return data
 
