@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from app_authentication.permissions import IsReviewerOrReadOnly
+from app_authentication.api.permissions import IsReviewerOrReadOnly
 from app_reviews.api.serializers import ReviewSerializer, ReviewCreateUpdateSerializer
 from app_reviews.models import Review
 

@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from app_authentication.models import CustomUser
-from app_authentication.permissions import IsCustomerUser, IsBusinessUser
+from app_authentication.api.permissions import IsCustomerUser, IsBusinessUser
 from app_offers.models import Detail
 from app_orders.api.serializers import OrderSerializer, OrderCreateSerializer
 from app_orders.models import Order

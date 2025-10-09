@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from app_authentication.models import CustomUser
-from app_authentication.permissions import IsProfileOwnerOrReadOnly
+from app_authentication.api.permissions import IsProfileOwnerOrReadOnly
 from app_profile.api.serializers import BusinessProfileSerializer, CustomerProfileSerializer, ProfileDetailSerializer
 from app_profile.models import Profile
 
