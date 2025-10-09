@@ -47,10 +47,10 @@ class ReviewCreateUpdateSerializer(serializers.ModelSerializer):
         business_user = data.get("business_user")
 
         if reviewer == business_user:
-            raise PermissionDenied("You cannot review yourself.")
+            raise serializers.ValidationError({"business_user": "You cannot review yourself."})
 
         if Review.objects.filter(business_user=business_user, reviewer=reviewer).exists():
-            raise PermissionDenied("You have already reviewed this provider.")
+            raise serializers.ValidationError({"business_user": "You have already reviewed this provider."})
 
         return data
 
