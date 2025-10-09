@@ -54,6 +54,16 @@ class OfferCreateUpdateSerializer(serializers.ModelSerializer):
     """
     details = DetailSerializer(many=True)
 
+    def validate(self, attrs):
+        details = attrs.get('details', None)
+        if details is not None:
+            for i, detail in enumerate(details):
+                if 'offer_type' not in detail or not detail['offer_type']:
+                    raise serializers.ValidationError({
+                        "details": {i: "offer_type is required for each detail."}
+                    })
+        return attrs
+
     def validate_details(self, value):
         """
         Validates the number of details during creation.
