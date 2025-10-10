@@ -64,7 +64,7 @@ class Detail(models.Model):
     """
     offer = models.ForeignKey(Offer, on_delete=models.CASCADE, related_name="details")
     title = models.CharField(max_length=255)
-    revisions = models.PositiveIntegerField()
+    revisions = models.IntegerField()
     delivery_time_in_days = models.PositiveIntegerField()
     price = models.DecimalField(max_digits=16, decimal_places=2)
     features = models.JSONField(default=list)
